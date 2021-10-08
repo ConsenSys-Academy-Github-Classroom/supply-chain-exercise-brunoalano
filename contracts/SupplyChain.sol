@@ -11,26 +11,26 @@ contract SupplyChain {
 
     struct Item {
         string name;
-        uint256 sku;
-        uint256 price;
+        uint sku;
+        uint price;
         State state;
         address payable seller;
         address payable buyer;
     }
 
     address public owner;
-    uint256 public skuCount;
+    uint public skuCount;
 
     // <items mapping>
-    mapping(uint256 => Item) public items;
+    mapping(uint => Item) public items;
 
     /*
      * Events
      */
-    event LogForSale(uint256 sku);
-    event LogSold(uint256 sku);
-    event LogShipped(uint256 sku);
-    event LogReceived(uint256 sku);
+    event LogForSale(uint sku);
+    event LogSold(uint sku);
+    event LogShipped(uint sku);
+    event LogReceived(uint sku);
 
     // <LogForSale event: sku arg>
 
@@ -56,12 +56,12 @@ contract SupplyChain {
         _;
     }
 
-    modifier paidEnough(uint256 _price) {
+    modifier paidEnough(uint _price) {
         require(msg.value >= _price);
         _;
     }
 
-    modifier checkValue(uint256 _sku) {
+    modifier checkValue(uint _sku) {
         //refund them after pay for item (why it is before, _ checks for logic before func)
         _;
         if (msg.value > items[_sku].price) {
@@ -78,22 +78,22 @@ contract SupplyChain {
     // an Item has been added?
 
     // modifier forSale
-    modifier forSale(uint256 _sku) {
+    modifier forSale(uint _sku) {
         require(items[_sku].state == State.ForSale, "Not for sale");
         _;
     }
 
-    modifier sold(uint256 _sku) {
+    modifier sold(uint _sku) {
         require(items[_sku].state == State.Sold, "Not sold");
         _;
     }
 
-    modifier shipped(uint256 _sku) {
+    modifier shipped(uint _sku) {
         require(items[_sku].state == State.Shipped, "Not shipped");
         _;
     }
 
-    modifier received(uint256 _sku) {
+    modifier received(uint _sku) {
         require(items[_sku].state == State.Received, "Not received");
         _;
     }
@@ -102,7 +102,7 @@ contract SupplyChain {
         owner = msg.sender;
     }
 
-    function addItem(string memory _name, uint256 _price)
+    function addItem(string memory _name, uint _price)
         public
         returns (bool)
     {
@@ -136,7 +136,7 @@ contract SupplyChain {
     //    - check the value after the function is called to make
     //      sure the buyer is refunded any excess ether sent.
     // 6. call the event associated with this function!
-    function buyItem(uint256 sku)
+    function buyItem(uint sku)
         public
         payable
         forSale(sku)
@@ -156,7 +156,7 @@ contract SupplyChain {
     //    - the person calling this function is the seller.
     // 2. Change the state of the item to shipped.
     // 3. call the event associated with this function!
-    function shipItem(uint256 sku)
+    function shipItem(uint sku)
         public
         sold(sku)
         verifyCaller(items[sku].seller)
@@ -170,7 +170,7 @@ contract SupplyChain {
     //    - the person calling this function is the buyer.
     // 2. Change the state of the item to received.
     // 3. Call the event associated with this function!
-    function receiveItem(uint256 sku)
+    function receiveItem(uint sku)
         public
         shipped(sku)
         verifyCaller(items[sku].buyer)
@@ -180,14 +180,14 @@ contract SupplyChain {
     }
 
     // Uncomment the following code block. it is needed to run tests
-    function fetchItem(uint256 _sku)
+    function fetchItem(uint _sku)
         public
         view
         returns (
             string memory name,
-            uint256 sku,
-            uint256 price,
-            uint256 state,
+            uint sku,
+            uint price,
+            uint state,
             address seller,
             address buyer
         )
@@ -195,7 +195,7 @@ contract SupplyChain {
         name = items[_sku].name;
         sku = items[_sku].sku;
         price = items[_sku].price;
-        state = uint256(items[_sku].state);
+        state = uint(items[_sku].state);
         seller = items[_sku].seller;
         buyer = items[_sku].buyer;
         return (name, sku, price, state, seller, buyer);
